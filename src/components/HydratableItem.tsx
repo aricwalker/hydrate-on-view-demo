@@ -66,7 +66,7 @@ export function HydratableItem({ id }: HydratableItemProps) {
   return (
     <div ref={setRefs} data-id={id} className="min-h-[120px] mb-4">
       {!isHydrated ? (
-        <div className="p-4 bg-muted/30 border border-dashed rounded-lg">
+        <div className="p-4 bg-card border rounded-lg shadow-sm transition-all duration-300 hover:shadow-md">
           {item ? (
             <>
               <h3 className="font-semibold text-lg text-foreground mb-2">{item.title}</h3>
