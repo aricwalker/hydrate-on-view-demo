@@ -13,6 +13,9 @@ export function ItemView({ id }: ItemViewProps) {
       <div className="p-4 bg-muted/50 rounded-lg animate-pulse">
         <div className="h-4 bg-muted rounded w-1/3 mb-2"></div>
         <div className="h-3 bg-muted rounded w-full"></div>
+        <div className="mt-2 text-xs text-muted-foreground">
+          Loading item #{id}...
+        </div>
       </div>
     );
   }
