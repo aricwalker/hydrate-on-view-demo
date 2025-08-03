@@ -3,7 +3,10 @@ import { useInView } from 'react-intersection-observer';
 import { createRoot, Root } from 'react-dom/client';
 import { ItemView } from './ItemView';
 import { useItemStore } from '../lib/store';
-import ReactDOMServer from 'react-dom/server';
+
+// A different path with rendering to static markup
+// import ReactDOMServer from 'react-dom/server';
+// hydrationContainer.innerHTML = ReactDOMServer.renderToStaticMarkup
 
 interface HydratableItemProps {
   id: string;
@@ -43,24 +46,15 @@ export function HydratableItem({ id }: HydratableItemProps) {
       }
     } else if (!inView && rootRef.current && isHydrated) {
       try {
-        rootRef.current.unmount();
-        rootRef.current = null;
-        setIsHydrated(false);
-
-        // Render static HTML for the dehydrated state
-        if (hydrationContainer) {
-          hydrationContainer.innerHTML = ReactDOMServer.renderToStaticMarkup(
-            <div className="p-4 bg-muted/30 border rounded-lg shadow-sm transition-all duration-300 hover:shadow-md">
-              <h3 className="font-semibold text-lg text-foreground mb-2">{item?.title}</h3>
-              <p className="text-muted-foreground leading-relaxed">{item?.detail}</p>
-              <div className="mt-3 text-xs text-muted-foreground">
-                🌵 Dehydrated component #{id}
-              </div>
-            </div>
-          );
-        }
-
-        console.log('Dehydrated component:', id);
+        // Defer unmounting to avoid race conditions
+        setTimeout(() => {
+          if (rootRef.current) {
+            rootRef.current.unmount();
+            rootRef.current = null;
+            setIsHydrated(false);
+            console.log('Dehydrated component:', id);
+          }
+        }, 0);
       } catch (error) {
         console.error('Failed to unmount component:', error);
       }
