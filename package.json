@@ -3,13 +3,15 @@
     "private": true,
     "version": "0.0.0",
     "type": "module",
+    "homepage": "https://aricwalker.github.io/hydrate-on-view-demo",
     "scripts": {
         "dev": "vite",
         "kill": "fuser -k 5000/tcp",
         "build": "tsc -b --noCheck && vite build",
         "lint": "eslint .",
         "optimize": "vite optimize",
-        "preview": "vite preview"
+        "preview": "vite preview",
+        "deploy": "npm run build && gh-pages -d dist"
     },
     "dependencies": {
         "@heroicons/react": "^2.2.0",
@@ -85,6 +87,7 @@
         "eslint": "^9.28.0",
         "eslint-plugin-react-hooks": "^5.2.0",
         "eslint-plugin-react-refresh": "^0.4.19",
+        "gh-pages": "^6.3.0",
         "globals": "^16.0.0",
         "tailwindcss": "^4.1.11",
         "typescript": "~5.7.2",
