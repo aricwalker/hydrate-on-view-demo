@@ -2,7 +2,7 @@ import { useItemStore } from './store';
 
 async function preload() {
   try {
-    const res = await fetch('/items.json');
+    const res = await fetch('items.json');
     if (!res.ok) {
       throw new Error(`Failed to fetch items: ${res.status} ${res.statusText}`);
     }
