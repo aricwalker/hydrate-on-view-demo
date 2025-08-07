@@ -3,9 +3,10 @@ import { useItemStore } from '../lib/store';
 
 interface ItemViewProps {
   id: string;
+  inView: boolean;
 }
 
-export function ItemView({ id }: ItemViewProps) {
+export function ItemView({ id, inView }: ItemViewProps) {
   const item = useItemStore((s) => s.items[id]);
   
   if (!item) {
@@ -25,7 +26,7 @@ export function ItemView({ id }: ItemViewProps) {
       <h3 className="font-semibold text-lg text-foreground mb-2">{item.title}</h3>
       <p className="text-muted-foreground leading-relaxed">{item.detail}</p>
       <div className="mt-3 text-xs text-muted-foreground">
-        ✨ Hydrated component #{id}
+        {inView ? "✨ Hydrated component #{id}" : "👀 Not in view"}
       </div>
     </div>
   );
