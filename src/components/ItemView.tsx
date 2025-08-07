@@ -26,7 +26,7 @@ export function ItemView({ id, inView }: ItemViewProps) {
       <h3 className="font-semibold text-lg text-foreground mb-2">{item.title}</h3>
       <p className="text-muted-foreground leading-relaxed">{item.detail}</p>
       <div className="mt-3 text-xs text-muted-foreground">
-        {inView ? "✨ Hydrated component #{id}" : "👀 Not in view"}
+        {inView ? "✨ Hydrated component" : "👀 Not in view"} #{id}
       </div>
     </div>
   );
