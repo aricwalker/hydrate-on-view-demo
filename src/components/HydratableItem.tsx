@@ -36,7 +36,6 @@ export function HydratableItem({ id }: HydratableItemProps) {
       // Let React render <ItemView>
       console.log('Hydrating component:', id);
     } else if (containerRef.current) {
-      containerRef.current.dangerouslySetInnerHTML = { __html: staticHtmlRef.current };
       console.log('Dehydrated component:', id);
     }
   }, [inView, id]);
