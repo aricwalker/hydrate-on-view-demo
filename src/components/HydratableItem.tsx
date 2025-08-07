@@ -1,12 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useInView } from 'react-intersection-observer';
-import { createRoot, Root } from 'react-dom/client';
 import { ItemView } from './ItemView';
 import { useItemStore } from '../lib/store';
-
-// A different path with rendering to static markup
-// import ReactDOMServer from 'react-dom/server';
-// hydrationContainer.innerHTML = ReactDOMServer.renderToStaticMarkup
 
 interface HydratableItemProps {
   id: string;
@@ -14,9 +9,7 @@ interface HydratableItemProps {
 
 export function HydratableItem({ id }: HydratableItemProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const hydrationRef = useRef<HTMLDivElement>(null);
-  const rootRef = useRef<Root | null>(null);
-  const [isHydrated, setIsHydrated] = useState(false);
+  const staticHtmlRef = useRef<string>('');
   
   // Access item data for static preview
   const item = useItemStore((s) => s.items[id]);
@@ -32,60 +25,27 @@ export function HydratableItem({ id }: HydratableItemProps) {
   };
 
   useEffect(() => {
-    const hydrationContainer = hydrationRef.current;
-
-    if (inView && hydrationContainer && !rootRef.current && !isHydrated) {
-      try {
-        const root = createRoot(hydrationContainer);
-        rootRef.current = root;
-        root.render(<ItemView id={id} />);
-        setIsHydrated(true);
-        console.log('Hydrated component:', id);
-      } catch (error) {
-        console.error('Failed to hydrate component:', error);
-      }
-    } else if (!inView && rootRef.current && isHydrated) {
-      try {
-        // Defer unmounting to avoid race conditions
-        setTimeout(() => {
-          if (rootRef.current) {
-            rootRef.current.unmount();
-            rootRef.current = null;
-            setIsHydrated(false);
-            console.log('Dehydrated component:', id);
-          }
-        }, 0);
-      } catch (error) {
-        console.error('Failed to unmount component:', error);
-      }
+    if (inView && containerRef.current && !staticHtmlRef.current) {
+      staticHtmlRef.current = containerRef.current.innerHTML;
+      console.log('Static HTML captured:', staticHtmlRef.current);
     }
-  }, [inView, id, isHydrated]);
+  }, [inView, item]);
 
   useEffect(() => {
-    return () => {
-      if (rootRef.current) {
-        try {
-          rootRef.current.unmount();
-          rootRef.current = null;
-        } catch (error) {
-          console.error('Failed to cleanup component:', error);
-        }
-      }
-    };
-  }, []);
+    if (inView) {
+      // Let React render <ItemView>
+      console.log('Hydrating component:', id);
+    } else if (containerRef.current) {
+      containerRef.current.dangerouslySetInnerHTML = { __html: staticHtmlRef.current };
+      console.log('Dehydrated component:', id);
+    }
+  }, [inView, id]);
 
   return (
     <div ref={setRefs} data-id={id} className="min-h-[120px] mb-4">
-      {!isHydrated ? (
-        <div className="p-4 bg-muted/30 border rounded-lg shadow-sm transition-all duration-300 hover:shadow-md">
-          <h3 className="font-semibold text-lg text-foreground mb-2">{item?.title}</h3>
-          <p className="text-muted-foreground leading-relaxed">{item?.detail}</p>
-          <div className="mt-3 text-xs text-muted-foreground">
-            🌵 Dehydrated component #{id}
-          </div>
-        </div>
-      ) : null}
-      <div ref={hydrationRef} />
+        {inView || staticHtmlRef.current === ''
+          ? <div><ItemView id={id} inView={inView} /></div>
+          : <div dangerouslySetInnerHTML={{ __html: staticHtmlRef.current }} />}
     </div>
   );
 }
