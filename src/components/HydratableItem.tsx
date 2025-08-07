@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useInView } from 'react-intersection-observer';
-import { createRoot, Root } from 'react-dom/client';
+import { createPortal } from 'react-dom';
 import { ItemView } from './ItemView';
 import { useItemStore } from '../lib/store';
 
@@ -15,7 +15,6 @@ interface HydratableItemProps {
 export function HydratableItem({ id }: HydratableItemProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const hydrationRef = useRef<HTMLDivElement>(null);
-  const rootRef = useRef<Root | null>(null);
   const [isHydrated, setIsHydrated] = useState(false);
   
   // Access item data for static preview
@@ -34,26 +33,19 @@ export function HydratableItem({ id }: HydratableItemProps) {
   useEffect(() => {
     const hydrationContainer = hydrationRef.current;
 
-    if (inView && hydrationContainer && !rootRef.current && !isHydrated) {
+    if (inView && hydrationContainer && !isHydrated) {
       try {
-        const root = createRoot(hydrationContainer);
-        rootRef.current = root;
-        root.render(<ItemView id={id} />);
         setIsHydrated(true);
         console.log('Hydrated component:', id);
       } catch (error) {
         console.error('Failed to hydrate component:', error);
       }
-    } else if (!inView && rootRef.current && isHydrated) {
+    } else if (!inView && isHydrated) {
       try {
         // Defer unmounting to avoid race conditions
         setTimeout(() => {
-          if (rootRef.current) {
-            rootRef.current.unmount();
-            rootRef.current = null;
-            setIsHydrated(false);
-            console.log('Dehydrated component:', id);
-          }
+          setIsHydrated(false);
+          console.log('Dehydrated component:', id);
         }, 0);
       } catch (error) {
         console.error('Failed to unmount component:', error);
@@ -63,16 +55,12 @@ export function HydratableItem({ id }: HydratableItemProps) {
 
   useEffect(() => {
     return () => {
-      if (rootRef.current) {
-        try {
-          rootRef.current.unmount();
-          rootRef.current = null;
-        } catch (error) {
-          console.error('Failed to cleanup component:', error);
-        }
+      // Cleanup is handled by React when component unmounts
+      if (isHydrated) {
+        console.log('Cleanup component:', id);
       }
     };
-  }, []);
+  }, [id, isHydrated]);
 
   return (
     <div ref={setRefs} data-id={id} className="min-h-[120px] mb-4">
@@ -86,6 +74,10 @@ export function HydratableItem({ id }: HydratableItemProps) {
         </div>
       ) : null}
       <div ref={hydrationRef} />
+      {isHydrated && hydrationRef.current && createPortal(
+        <ItemView id={id} />,
+        hydrationRef.current
+      )}
     </div>
   );
 }
