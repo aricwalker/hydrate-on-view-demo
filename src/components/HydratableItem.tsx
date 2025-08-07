@@ -43,8 +43,8 @@ export function HydratableItem({ id }: HydratableItemProps) {
 
   return (
     <div ref={setRefs} data-id={id} className="min-h-[120px] mb-4">
-        {inView
-          ? <ItemView id={id} inView={inView} />
+        {inView || staticHtmlRef.current === ''
+          ? <div><ItemView id={id} inView={inView} /></div>
           : <div dangerouslySetInnerHTML={{ __html: staticHtmlRef.current }} />}
     </div>
   );
