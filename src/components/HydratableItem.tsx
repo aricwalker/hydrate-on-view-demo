@@ -3,10 +3,6 @@ import { useInView } from 'react-intersection-observer';
 import { ItemView } from './ItemView';
 import { useItemStore } from '../lib/store';
 
-// A different path with rendering to static markup
-// import ReactDOMServer from 'react-dom/server';
-// hydrationContainer.innerHTML = ReactDOMServer.renderToStaticMarkup
-
 interface HydratableItemProps {
   id: string;
 }
@@ -29,24 +25,27 @@ export function HydratableItem({ id }: HydratableItemProps) {
   };
 
   useEffect(() => {
-    if (containerRef.current && !staticHtmlRef.current) {
+    if (inView && containerRef.current && !staticHtmlRef.current) {
       staticHtmlRef.current = containerRef.current.innerHTML;
+      console.log('Static HTML captured:', staticHtmlRef.current);
     }
-  }, []);
+  }, [inView, item]);
 
   useEffect(() => {
     if (inView) {
       // Let React render <ItemView>
       console.log('Hydrating component:', id);
     } else if (containerRef.current) {
-      containerRef.current.innerHTML = staticHtmlRef.current;
+      containerRef.current.dangerouslySetInnerHTML = { __html: staticHtmlRef.current };
       console.log('Dehydrated component:', id);
     }
   }, [inView, id]);
 
   return (
     <div ref={setRefs} data-id={id} className="min-h-[120px] mb-4">
-      {inView && <ItemView id={id} inView={inView} />}
+        {inView
+          ? <ItemView id={id} inView={inView} />
+          : <div dangerouslySetInnerHTML={{ __html: staticHtmlRef.current }} />}
     </div>
   );
 }
